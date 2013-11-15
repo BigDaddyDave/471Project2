@@ -17,7 +17,7 @@ int main()
 {
 	ifstream infile;					//input file stream
 	int PageSize=0;						//will loop through 512, 1024 and 2048
-	int FrameSize=0;					//will loop through 4, 8, 12 
+	unsigned FrameSize=0;				//will loop through 4, 8, 12 
 	int Address=0;						//virtual address read from file
 	vector<int> MemData;				//vector to hold virtual address from file
 	vector<int> PageData;				//vector to hold the page that corresponds to the virtual address 
@@ -73,7 +73,7 @@ void Optimal(int PageSize, int FrameSize, vector<int> & PageData)
 {
 	int PageFaults=0;							//Count the faults
 	int MaxPageNum=0;							//Find the Max page address to determine number of pages
-	int CurrentPosition=0;						//Current page position (Simulates what page must be loaded based on virtual address)
+	unsigned CurrentPosition=0;						//Current page position (Simulates what page must be loaded based on virtual address)
 	int NextLoc=0;								//The next position of a Page in the PageData vector - used as a weight
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
@@ -165,7 +165,7 @@ void Lru(int PageSize, int FrameSize, vector<int> & PageData)
 {
 	int PageFaults=0;							//Count the faults
 	int MaxPageNum=0;							//Find the Max page address to determine number of pages
-	int CurrentPosition=0;						//Current page position (Simulates what page must be loaded based on virtual address)
+	unsigned CurrentPosition=0;					//Current page position (Simulates what page must be loaded based on virtual address)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<pair<int,int>> Frame;				//Vector of pairs (Page, Index)
@@ -248,7 +248,7 @@ void Mru(int PageSize, int FrameSize, vector<int> & PageData)
 {
 	int PageFaults=0;							//Count the faults
 	int MaxPageNum=0;							//Find the Max page address to determine number of pages
-	int CurrentPosition=0;						//Current page position (Simulates what page must be loaded based on virtual address)
+	unsigned CurrentPosition=0;					//Current page position (Simulates what page must be loaded based on virtual address)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<pair<int,int>> Frame;				//Vector of pairs (Page, Index)
@@ -331,7 +331,7 @@ void Fifo(int PageSize, int FrameSize, vector<int> & PageData)
 {
 	int PageFaults=0;							//Count the faults
 	int MaxPageNum=0;							//Find the Max page address to determine number of pages
-	int CurrentPosition=0;						//Current page position (Simulates what page must be loaded based on virtual address)
+	unsigned CurrentPosition=0;					//Current page position (Simulates what page must be loaded based on virtual address)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<int> Frame;							//Vector of Pages in Frames
