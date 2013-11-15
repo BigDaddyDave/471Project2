@@ -11,15 +11,15 @@ void Optimal(int, int, vector<int>&);
 void Fifo(int, int, vector<int>&);
 void Lru(int, int, vector<int>&);
 void Mru(int, int, vector<int>&);
-void Display(int, int, string, double);
+void Display(int, int, int, string, double);
 
 int main()
 {
 	ifstream infile;					//input file stream
 	int PageSize=0;						//will loop through 512, 1024 and 2048
 	int FrameSize=0;					//will loop through 4, 8, 12 
-	int Address;						//address read from file
-	vector<int> MemData;				//vector to hold address from file
+	int Address=0;						//virtual address read from file
+	vector<int> MemData;				//vector to hold virtual address from file
 	vector<int> PageData;				//vector to hold the page that corresponds to the virtual address 
 
 	infile.open("testfile.dat");
@@ -39,12 +39,18 @@ int main()
 		infile>>Address;
 	}
 
-	//Loop through the 9 different possibilities
+	//Heading for Display set here since display is called by each page replacement algorithm function
+	cout<<setprecision(2)<<fixed;  //setoutput flags
+	cout<<left<<setw(11)<<"Page Size"<<setw(12)<<"# Of Pages"<<setw(13)<<"# Of Frames"<<setw(22)
+	<<"Page Replacement ALG"<<setw(23)<<"Page Fault Percentage"<<endl;
+	cout<<"=========  ==========  ===========  ====================  ====================="<<endl;
+
+	//Loop through the 9 different possibilities for each replacement algorithm
 	for (PageSize=512; PageSize<=2048; PageSize=PageSize*2)		//Outerloop of PageSizes
 	{
 		for (FrameSize=4; FrameSize<=12; FrameSize=FrameSize+4)	//Innerloop of FrameSizes
 		{
-			for (unsigned x=0; x<MemData.size(); x++)			//Reload PageData Vector based on new PageSize
+			for (unsigned x=0; x<MemData.size(); x++)			//Load PageData Vector based on PageSize
 			{
 				PageData.push_back(MemData.at(x)/PageSize);
 			}
@@ -53,9 +59,9 @@ int main()
 			Lru(PageSize, FrameSize, PageData);					//Function call to Lru
 			Mru(PageSize, FrameSize, PageData);					//Function call to Mru
 			PageData.clear();									//Clear out the PageData vector after each run
+			cout<<"-------------------------------------------------------------------------------"<<endl;	
 		}
 	} 
-
 	system("pause");
 	return 0;
 }
@@ -73,12 +79,6 @@ void Optimal(int PageSize, int FrameSize, vector<int> & PageData)
 	bool Hit=false;								//Track if page is already in a frame
 	vector<pair<int,int>> Frame;				//Vector of pairs (Page, NextLoc)
 	vector<int>::iterator PageItr;				//Iterator for PageData vector passed into function
-
-	//This is to display the page numbers for debugging
-	for (unsigned i=0; i<PageData.size(); i++)
-	{
-		cout<<"Page: "<<PageData.at(i)<<endl;
-	}
 
 	//Loop through the PageData vector, load frames, count faults
 	while (CurrentPosition<PageData.size())
@@ -149,26 +149,13 @@ void Optimal(int PageSize, int FrameSize, vector<int> & PageData)
 				Frame.at(VicPosition).second=NextLoc;
 				PageFaults=PageFaults+1;
 			}
-		}//end else
-				
+		}//end else				
 		CurrentPosition=CurrentPosition+1; //move to next page needed by "program"
 
-		//Display Frames for debugging
-		for (unsigned i=0; i<Frame.size(); i++)
-		{
-			cout<<"Frame: "<<i<<" holds: "<<"("<<Frame.at(i).first<<","<<Frame.at(i).second<<")"<<endl;
-		}
-		cout<<"PageFaults: "<<PageFaults<<endl<<endl;
 	}//end of while loop
 
 	FaultPercent=(double)PageFaults/(double)PageData.size();
-
-	cout<<endl<<"Final statistical data which will be feed to display function:"<<endl;
-	cout<<"Page Size: "<<PageSize<<endl;
-	cout<<"Number of Frames: "<<FrameSize<<endl;
-	cout<<"# of Pages: "<<MaxPageNum+1<<endl;	//Add 1 to account for page 0
-	cout<<"Page replacement ALG: Optimal"<<endl;
-	cout<<"Page fault percentage: "<<FaultPercent<<endl;
+	Display(PageSize, MaxPageNum+1, FrameSize, "OPTIMAL", FaultPercent);
 }
 
 //****************************************************************************************
@@ -182,12 +169,6 @@ void Lru(int PageSize, int FrameSize, vector<int> & PageData)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<pair<int,int>> Frame;				//Vector of pairs (Page, Index)
-
-	//This is to display the page numbers for debugging
-	for (unsigned i=0; i<PageData.size(); i++)
-	{
-		cout<<"Page: "<<PageData.at(i)<<endl;
-	}
 
 	//Loop through the PageData vector, load frames, count faults, etc.
 	while (CurrentPosition<PageData.size())
@@ -252,25 +233,12 @@ void Lru(int PageSize, int FrameSize, vector<int> & PageData)
 				PageFaults=PageFaults+1;
 			}
 		}//end else
-
 		CurrentPosition=CurrentPosition+1; //move to next page needed by "program"
 
-		//Display Frames for debugging
-		for (unsigned i=0; i<Frame.size(); i++)
-		{
-			cout<<"Frame: "<<i<<" holds: "<<"("<<Frame.at(i).first<<","<<Frame.at(i).second<<")"<<endl;
-		}
-		cout<<"PageFaults: "<<PageFaults<<endl<<endl;
 	}//end while
 
 	FaultPercent=(double)PageFaults/(double)PageData.size();
-
-	cout<<endl<<"Final statistical data which will be feed to display function:"<<endl;
-	cout<<"Page Size: "<<PageSize<<endl;
-	cout<<"Number of Frames: "<<FrameSize<<endl;
-	cout<<"# of Pages: "<<MaxPageNum+1<<endl;	//Add 1 to account for page 0
-	cout<<"Page replacement ALG: LRU"<<endl;
-	cout<<"Page fault percentage: "<<FaultPercent<<endl;
+	Display(PageSize, MaxPageNum+1, FrameSize, "LRU", FaultPercent);
 }
 
 //****************************************************************************************
@@ -284,12 +252,6 @@ void Mru(int PageSize, int FrameSize, vector<int> & PageData)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<pair<int,int>> Frame;				//Vector of pairs (Page, Index)
-
-	//This is to display the page numbers for debugging
-	for (unsigned i=0; i<PageData.size(); i++)
-	{
-		cout<<"Page: "<<PageData.at(i)<<endl;
-	}
 
 	//Loop through the PageData vector, load frames, count faults, etc.
 	while (CurrentPosition<PageData.size())
@@ -354,25 +316,12 @@ void Mru(int PageSize, int FrameSize, vector<int> & PageData)
 				PageFaults=PageFaults+1;
 			}
 		}//end else
-
 		CurrentPosition=CurrentPosition+1; //move to next page needed by "program"
 
-		//Display Frames for debugging
-		for (unsigned i=0; i<Frame.size(); i++)
-		{
-			cout<<"Frame: "<<i<<" holds: "<<"("<<Frame.at(i).first<<","<<Frame.at(i).second<<")"<<endl;
-		}
-		cout<<"PageFaults: "<<PageFaults<<endl<<endl;
 	}//end while
 
 	FaultPercent=(double)PageFaults/(double)PageData.size();
-
-	cout<<endl<<"Final statistical data which will be feed to display function:"<<endl;
-	cout<<"Page Size: "<<PageSize<<endl;
-	cout<<"Number of Frames: "<<FrameSize<<endl;
-	cout<<"# of Pages: "<<MaxPageNum+1<<endl;	//Add 1 to account for page 0
-	cout<<"Page replacement ALG: MRU"<<endl;
-	cout<<"Page fault percentage: "<<FaultPercent<<endl;
+	Display(PageSize, MaxPageNum+1, FrameSize, "MRU", FaultPercent);
 }
 
 //****************************************************************************************
@@ -386,12 +335,6 @@ void Fifo(int PageSize, int FrameSize, vector<int> & PageData)
 	double FaultPercent=0.0;					//Holds the page fault percentage
 	bool Hit=false;								//Track if page is already in a frame
 	vector<int> Frame;							//Vector of Pages in Frames
-
-	//This is to display the page numbers for debugging
-	for (unsigned i=0; i<PageData.size(); i++)
-	{
-		cout<<"Page: "<<PageData.at(i)<<endl;
-	}
 
 	//Loop through the PageData vector, load frames, count faults, etc.
 	while (CurrentPosition<PageData.size())
@@ -444,46 +387,18 @@ void Fifo(int PageSize, int FrameSize, vector<int> & PageData)
 			PageFaults=PageFaults+1;
 			}
 		}//end else
-
 		CurrentPosition=CurrentPosition+1; //move to next page needed by "program"
 
-		//Display Frames for debugging
-		for (unsigned i=0; i<Frame.size(); i++)
-		{
-			cout<<"Frame: "<<i<<" holds: "<<"("<<Frame.at(i)<<")"<<endl;
-		}
-		cout<<"PageFaults: "<<PageFaults<<endl<<endl;
 	}//end while
 
 	FaultPercent=(double)PageFaults/(double)PageData.size();
-
-	cout<<endl<<"Final statistical data which will be feed to display function:"<<endl;
-	cout<<"Page Size: "<<PageSize<<endl;
-	cout<<"Number of Frames: "<<FrameSize<<endl;
-	cout<<"# of Pages: "<<MaxPageNum+1<<endl;	//Add 1 to account for page 0
-	cout<<"Page replacement ALG: FIFO"<<endl;
-	cout<<"Page fault percentage: "<<FaultPercent<<endl;
+	Display(PageSize, MaxPageNum+1, FrameSize, "FIFO", FaultPercent);
 }
 
 //****************************************************************************************
 //**                          Dispaly Function Starts Here                              **
 //****************************************************************************************
-void Display(int PageSize, int FrameSize, string Algorithm, double FaultPercent)
+void Display(int PageSize, int NumPages, int FrameSize, string Algorithm, double FaultPercent)
 {
-	//Heading should print in maing before calling functions
-cout<<left<<setw(11)<<"Page Size"<<setw(12)<<"# of pages"<<setw(22)<<"Page replacement ALG"<<setw(23)<<"Page fault percentage"<<endl;
+	cout<<setw(11)<<PageSize<<setw(12)<<NumPages<<setw(13)<<FrameSize<<setw(22)<<Algorithm<<setw(23)<<FaultPercent<<endl;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
